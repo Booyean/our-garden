@@ -23,8 +23,9 @@ export async function onRequestGet(context) {
     return ok(row);
   }
 
+  // 列表不返回 base64 数据，只返回元数据
   var rows = await env.DB.prepare(
-    'SELECT * FROM photos ORDER BY upload_time DESC'
+    'SELECT id, caption, photo_date, location, upload_time FROM photos ORDER BY upload_time DESC'
   ).all();
   return ok(rows.results);
 }

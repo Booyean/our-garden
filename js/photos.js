@@ -125,7 +125,7 @@
       imgWrap.className = 'photo-card-img-wrap';
       var img = document.createElement('img');
       img.className = 'photo-card-img lazy';
-      img.setAttribute('data-src', photo.image_data);
+      img.setAttribute('data-src', photo.image_data || (API_BASE + '?id=' + photo.id));
       img.alt = photo.caption || '';
       imgWrap.appendChild(img);
 
@@ -336,12 +336,26 @@
   function updateLightbox() {
     var photo = state.photos[state.lbIndex];
     if (!photo) return;
-    lbImg.src = photo.image_data;
     lbCaption.textContent = photo.caption || '';
     var parts = [];
     if (photo.photo_date) parts.push(formatDateDisplay(photo.photo_date));
     if (photo.location) parts.push(photo.location);
     lbMeta.textContent = parts.join(' · ');
+
+    if (photo.image_data) {
+      lbImg.src = photo.image_data;
+    } else {
+      var apiUrl = API_BASE + '?id=' + photo.id;
+      if (!state.useLocal) {
+        fetch(apiUrl).then(function (r) { return r.json(); }).then(function (res) {
+          if (res.success && res.data) {
+            photo.image_data = res.data.image_data;
+            lbImg.src = photo.image_data;
+          }
+        }).catch(function () {});
+      }
+    }
+
     $('lbPrev').style.visibility = state.lbIndex > 0 ? 'visible' : 'hidden';
     $('lbNext').style.visibility = state.lbIndex < state.photos.length - 1 ? 'visible' : 'hidden';
   }
