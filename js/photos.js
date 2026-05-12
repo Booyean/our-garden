@@ -139,6 +139,7 @@
       var img = document.createElement('img');
       img.className = 'photo-card-img lazy';
       img.setAttribute('data-src', photo.image_data || (API_BASE + '/api/photos?id=' + photo.id));
+      img.setAttribute('data-idx', realIdx);
       img.alt = photo.caption || '';
       imgWrap.appendChild(img);
 
@@ -203,9 +204,12 @@
             if (!src) return;
 
             if (src.indexOf('/api/photos?id=') !== -1) {
+              var pIdx = parseInt(img.getAttribute('data-idx'));
               fetch(src).then(function (r) { return r.json(); }).then(function (res) {
                 if (res && res.data && res.data.image_data) {
-                  photo.image_data = res.data.image_data;
+                  if (!isNaN(pIdx) && state.photos[pIdx]) {
+                    state.photos[pIdx].image_data = res.data.image_data;
+                  }
                   img.src = res.data.image_data;
                 }
               }).catch(function () {});
@@ -224,8 +228,14 @@
         var src = img.getAttribute('data-src');
         if (src) {
           if (src.indexOf('/api/photos?id=') !== -1) {
+            var pIdx = parseInt(img.getAttribute('data-idx'));
             fetch(src).then(function (r) { return r.json(); }).then(function (res) {
-              if (res && res.data && res.data.image_data) img.src = res.data.image_data;
+              if (res && res.data && res.data.image_data) {
+                if (!isNaN(pIdx) && state.photos[pIdx]) {
+                  state.photos[pIdx].image_data = res.data.image_data;
+                }
+                img.src = res.data.image_data;
+              }
             });
           } else {
             img.src = src;
