@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>回忆相册 - 紫米芽和六角星的港湾</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="https://npm.elemecdn.com/lxgw-wenkai-screen-webfont/style.css" media="print" onload="this.media='all'">
+</head>
+<body>
+  <div class="toast" id="toast"></div>
+
+  <div class="lightbox" id="lightbox">
+    <button class="lb-close" id="lbClose">&times;</button>
+    <button class="lb-arrow lb-prev" id="lbPrev">&#8249;</button>
+    <div class="lb-content">
+      <img class="lb-img" id="lbImg" src="" alt="">
+      <div class="lb-info">
+        <p class="lb-caption" id="lbCaption"></p>
+        <p class="lb-meta" id="lbMeta"></p>
+      </div>
+    </div>
+    <button class="lb-arrow lb-next" id="lbNext">&#8250;</button>
+  </div>
+
+  <div class="upload-overlay" id="uploadOverlay">
+    <div class="upload-modal card">
+      <h3 class="upload-title">&#128248; 上传新回忆</h3>
+      <label class="upload-file-area" id="uploadFileArea">
+        <input type="file" id="uploadFileInput" accept="image/*" multiple hidden>
+        <span class="upload-file-icon">&#128247;</span>
+        <span class="upload-file-text">点击选择照片</span>
+        <span class="upload-file-hint">支持 JPG、PNG、GIF、WebP，可多选</span>
+      </label>
+      <div class="upload-preview" id="uploadPreview"></div>
+      <div class="upload-progress-bar" id="uploadProgressBar">
+        <div class="upload-progress-fill" id="uploadProgressFill"></div>
+      </div>
+      <input type="text" class="input-field upload-input" id="uploadCaption" placeholder="配文（可选）" maxlength="200">
+      <div class="upload-row">
+        <input type="date" class="input-field upload-input" id="uploadDate">
+        <input type="text" class="input-field upload-input" id="uploadLocation" placeholder="地点（可选）" maxlength="50">
+      </div>
+      <div class="upload-actions">
+        <button class="btn btn-secondary" id="uploadCancel">取消</button>
+        <button class="btn btn-primary" id="uploadSubmit">上传 &#128149;</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="page-container">
+    <div class="page-header">
+      <h1>回忆相册</h1>
+      <p>每一张照片都是一个故事</p>
+    </div>
+
+    <div class="timer-bar card" id="timerBar">
+      <span class="timer-label">我们已经在一起</span>
+      <span class="timer-value" id="timerValue"></span>
+    </div>
+
+    <div class="photos-toolbar">
+      <button class="btn btn-primary" id="uploadBtn">&#128247; 上传照片</button>
+    </div>
+
+    <div class="photos-grid" id="photosGrid"></div>
+
+    <div class="photos-empty" id="photosEmpty" style="display:none;">
+      <span class="photos-empty-icon">&#128247;</span>
+      <p>还没有照片哦～上传你们的第一张回忆吧 &#128149;</p>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <div class="nav-inner">
+      <a href="diary.html" class="nav-tab">
+        <span class="nav-icon">&#128214;</span>
+        <span class="nav-label">日记</span>
+      </a>
+      <a href="photos.html" class="nav-tab active">
+        <span class="nav-icon">&#128248;</span>
+        <span class="nav-label">相册</span>
+      </a>
+      <a href="wishes.html" class="nav-tab">
+        <span class="nav-icon">&#127919;</span>
+        <span class="nav-label">愿望</span>
+      </a>
+    </div>
+  </nav>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/music-player.js"></script>
+  <script src="js/bg-switcher.js"></script>
+  <script src="js/photos.js"></script>
+  <script>MusicPlayer.init(APP_CONFIG.MUSIC.playlist);</script>
+</body>
+</html>
