@@ -1,0 +1,11 @@
+name = "our-garden"
+compatibility_date = "2024-09-01"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "our-garden-db"
+database_id = "477e80f5-f6b2-440e-bc0a-b33c32e11fa7"
+
+# AUTH_PASSWORD 请在 Cloudflare Pages 面板 Settings > Environment variables 中设置
+# 不要写在此文件中
