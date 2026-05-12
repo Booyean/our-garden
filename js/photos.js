@@ -55,7 +55,7 @@
   function formatDateDisplay(dateStr) {
     if (!dateStr) return '';
     var p = dateStr.split('-');
-    return p[0 + p.length - 3] + '.' + p[1 + p.length - 3] + '.' + p[2 + p.length - 3];
+    return p[0] + '.' + p[1] + '.' + p[2];
   }
 
   function getLocalPhotos() {
@@ -138,8 +138,7 @@
       imgWrap.className = 'photo-card-img-wrap';
       var img = document.createElement('img');
       img.className = 'photo-card-img lazy';
-      img.setAttribute('data-src', photo.image_data || (API_BASE + '/api/photos?id=' + photo.id));
-      img.setAttribute('data-idx', realIdx);
+      img.setAttribute('data-src', photo.image_data || '');
       img.alt = photo.caption || '';
       imgWrap.appendChild(img);
 
@@ -180,7 +179,6 @@
     });
 
     updatePager(totalPages);
-
     initLazyLoad();
   }
 
@@ -201,22 +199,7 @@
           if (entry.isIntersecting) {
             var img = entry.target;
             var src = img.getAttribute('data-src');
-            if (!src) return;
-
-            if (src.indexOf('/api/photos?id=') !== -1) {
-              var pIdx = parseInt(img.getAttribute('data-idx'));
-              fetch(src).then(function (r) { return r.json(); }).then(function (res) {
-                if (res && res.data && res.data.image_data) {
-                  if (!isNaN(pIdx) && state.photos[pIdx]) {
-                    state.photos[pIdx].image_data = res.data.image_data;
-                  }
-                  img.src = res.data.image_data;
-                }
-              }).catch(function () {});
-            } else {
-              img.src = src;
-            }
-
+            if (src) img.src = src;
             img.classList.remove('lazy');
             observer.unobserve(img);
           }
@@ -226,32 +209,17 @@
     } else {
       gridEl.querySelectorAll('.lazy').forEach(function (img) {
         var src = img.getAttribute('data-src');
-        if (src) {
-          if (src.indexOf('/api/photos?id=') !== -1) {
-            var pIdx = parseInt(img.getAttribute('data-idx'));
-            fetch(src).then(function (r) { return r.json(); }).then(function (res) {
-              if (res && res.data && res.data.image_data) {
-                if (!isNaN(pIdx) && state.photos[pIdx]) {
-                  state.photos[pIdx].image_data = res.data.image_data;
-                }
-                img.src = res.data.image_data;
-              }
-            });
-          } else {
-            img.src = src;
-          }
-        }
+        if (src) img.src = src;
         img.classList.remove('lazy');
       });
     }
   }
 
   async function deletePhoto(id, idx) {
-    toast('删除中...');
     if (state.useLocal) {
-      state.photos = getLocalPhotos();
       state.photos.splice(idx, 1);
       saveLocalPhotos(state.photos);
+      if (state.photos.length % PAGE_SIZE === 0 && state.page > 0) state.page--;
       renderPhotos();
       toast('已删除');
       return;
@@ -260,11 +228,13 @@
     if (res && res.success) {
       state.photos.splice(idx, 1);
       saveLocalPhotos(state.photos);
+      if (state.photos.length % PAGE_SIZE === 0 && state.page > 0) state.page--;
       renderPhotos();
       toast('已删除');
     } else {
       state.photos.splice(idx, 1);
       saveLocalPhotos(state.photos);
+      if (state.photos.length % PAGE_SIZE === 0 && state.page > 0) state.page--;
       renderPhotos();
       toast('已删除（本地）');
     }
@@ -278,10 +248,7 @@
 
   function renderUploadPreview() {
     uploadPreview.innerHTML = '';
-    if (uploadFiles.length === 0) {
-      uploadFileArea.style.display = '';
-      return;
-    }
+    if (uploadFiles.length === 0) { uploadFileArea.style.display = ''; return; }
     uploadFileArea.style.display = 'none';
     uploadFiles.forEach(function (file) {
       var img = document.createElement('img');
@@ -320,8 +287,7 @@
 
     for (var i = 0; i < uploadFiles.length; i++) {
       var file = uploadFiles[i];
-      var progress = Math.round(((i + 1) / uploadFiles.length) * 100);
-      uploadProgressFill.style.width = progress + '%';
+      uploadProgressFill.style.width = Math.round(((i + 1) / uploadFiles.length) * 100) + '%';
 
       var base64 = await new Promise(function (resolve) {
         var reader = new FileReader();
@@ -353,23 +319,16 @@
             })
           });
           var data = await res.json();
-          if (!data.success) {
-            toast(data.message || '上传失败');
-            uploadProgressBar.style.display = 'none';
-            return;
-          }
-        } catch (e) {
-          state.useLocal = true;
-        }
+          if (!data.success) { toast(data.message || '上传失败'); uploadProgressBar.style.display = 'none'; return; }
+        } catch (e) { state.useLocal = true; }
       }
     }
 
     uploadProgressFill.style.width = '100%';
-    toast('上传成功！共 ' + uploadFiles.length + ' 张照片 &#128149;');
+    toast('上传成功 ' + uploadFiles.length + ' 张');
     setTimeout(function () {
       uploadOverlay.style.display = 'none';
       uploadProgressBar.style.display = 'none';
-      uploadProgressFill.style.width = '0%';
       loadPhotos();
     }, 500);
   });
@@ -389,28 +348,12 @@
   function updateLightbox() {
     var photo = state.photos[state.lbIndex];
     if (!photo) return;
+    lbImg.src = photo.image_data || '';
     lbCaption.textContent = photo.caption || '';
     var parts = [];
     if (photo.photo_date) parts.push(formatDateDisplay(photo.photo_date));
     if (photo.location) parts.push(photo.location);
     lbMeta.textContent = parts.join(' · ');
-
-    if (photo.image_data) {
-      lbImg.src = photo.image_data;
-    } else {
-      lbImg.classList.add('lb-loading');
-      var apiUrl = API_BASE + '/api/photos?id=' + photo.id;
-      if (!state.useLocal) {
-        fetch(apiUrl).then(function (r) { return r.json(); }).then(function (res) {
-          if (res.success && res.data) {
-            photo.image_data = res.data.image_data;
-            lbImg.src = photo.image_data;
-            lbImg.classList.remove('lb-loading');
-          }
-        }).catch(function () { lbImg.classList.remove('lb-loading'); });
-      }
-    }
-
     $('lbPrev').style.visibility = state.lbIndex > 0 ? 'visible' : 'hidden';
     $('lbNext').style.visibility = state.lbIndex < state.photos.length - 1 ? 'visible' : 'hidden';
   }
@@ -424,9 +367,7 @@
   }
 
   $('lbClose').addEventListener('click', closeLightbox);
-  lightbox.addEventListener('click', function (e) {
-    if (e.target === lightbox) closeLightbox();
-  });
+  lightbox.addEventListener('click', function (e) { if (e.target === lightbox) closeLightbox(); });
   $('lbPrev').addEventListener('click', lbPrev);
   $('lbNext').addEventListener('click', lbNext);
 
@@ -441,15 +382,8 @@
     if (e.key === 'ArrowRight') { state.page = Math.min(Math.ceil(state.photos.length / PAGE_SIZE) - 1, state.page + 1); renderPhotos(); }
   });
 
-  $('photosPrev').addEventListener('click', function () {
-    state.page = Math.max(0, state.page - 1);
-    renderPhotos();
-  });
-
-  $('photosNext').addEventListener('click', function () {
-    state.page = Math.min(Math.ceil(state.photos.length / PAGE_SIZE) - 1, state.page + 1);
-    renderPhotos();
-  });
+  $('photosPrev').addEventListener('click', function () { state.page = Math.max(0, state.page - 1); renderPhotos(); });
+  $('photosNext').addEventListener('click', function () { state.page = Math.min(Math.ceil(state.photos.length / PAGE_SIZE) - 1, state.page + 1); renderPhotos(); });
 
   var surpriseClickCount = 0;
   var surpriseClickTimer = null;
@@ -458,18 +392,12 @@
 
   timerBarEl.addEventListener('click', function () {
     surpriseClickCount++;
-    if (surpriseClickCount === 1) {
-      surpriseClickTimer = setTimeout(function () { surpriseClickCount = 0; }, 1500);
-    }
+    if (surpriseClickCount === 1) { surpriseClickTimer = setTimeout(function () { surpriseClickCount = 0; }, 1500); }
     if (surpriseClickCount >= 5) {
-      clearTimeout(surpriseClickTimer);
-      surpriseClickCount = 0;
+      clearTimeout(surpriseClickTimer); surpriseClickCount = 0;
       var code = prompt('请输入暗号：');
-      if (code && code.toLowerCase() === SURPRISE_CODE) {
-        window.location.href = 'surprise.html';
-      } else if (code !== null) {
-        toast('暗号不对哦～');
-      }
+      if (code && code.toLowerCase() === SURPRISE_CODE) { window.location.href = 'surprise.html'; }
+      else if (code !== null) { toast('暗号不对哦～'); }
     }
   });
 
