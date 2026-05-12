@@ -138,7 +138,7 @@
       imgWrap.className = 'photo-card-img-wrap';
       var img = document.createElement('img');
       img.className = 'photo-card-img lazy';
-      img.setAttribute('data-src', photo.image_data || (API_BASE + '?id=' + photo.id));
+      img.setAttribute('data-src', photo.image_data || (API_BASE + '/api/photos?id=' + photo.id));
       img.alt = photo.caption || '';
       imgWrap.appendChild(img);
 
@@ -162,13 +162,25 @@
       card.appendChild(info);
 
       card.addEventListener('click', function () { openLightbox(realIdx); });
+
+      var delBtn = document.createElement('button');
+      delBtn.className = 'photo-del-btn';
+      delBtn.textContent = '\u00D7';
+      delBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        var p = state.photos[realIdx];
+        if (!p) return;
+        if (!confirm('确定要删除这张照片吗？')) return;
+        deletePhoto(p.id, realIdx);
+      });
+      card.appendChild(delBtn);
+
       gridEl.appendChild(card);
     });
 
     updatePager(totalPages);
 
     initLazyLoad();
-    initDeleteOnDblClick();
   }
 
   function updatePager(totalPages) {
@@ -190,7 +202,7 @@
             var src = img.getAttribute('data-src');
             if (!src) return;
 
-            if (src.indexOf(API_BASE + '?id=') !== -1 || src.indexOf('/api/photos?id=') !== -1) {
+            if (src.indexOf('/api/photos?id=') !== -1) {
               fetch(src).then(function (r) { return r.json(); }).then(function (res) {
                 if (res && res.data && res.data.image_data) {
                   img.src = res.data.image_data;
@@ -221,19 +233,6 @@
         img.classList.remove('lazy');
       });
     }
-  }
-
-  function initDeleteOnDblClick() {
-    gridEl.querySelectorAll('.photo-card').forEach(function (card) {
-      card.addEventListener('dblclick', function (e) {
-        e.stopPropagation();
-        var idx = parseInt(card.getAttribute('data-idx'));
-        var photo = state.photos[idx];
-        if (!photo) return;
-        if (!confirm('确定要删除这张照片吗？')) return;
-        deletePhoto(photo.id, idx);
-      });
-    });
   }
 
   async function deletePhoto(id, idx) {
@@ -388,7 +387,7 @@
     if (photo.image_data) {
       lbImg.src = photo.image_data;
     } else {
-      var apiUrl = API_BASE + '?id=' + photo.id;
+      var apiUrl = API_BASE + '/api/photos?id=' + photo.id;
       if (!state.useLocal) {
         fetch(apiUrl).then(function (r) { return r.json(); }).then(function (res) {
           if (res.success && res.data) {

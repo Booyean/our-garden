@@ -896,6 +896,7 @@ input, button, textarea {
   transition: var(--transition);
   display: flex;
   flex-direction: column;
+  position: relative;
 }
 
 .photo-card:hover {
@@ -924,6 +925,33 @@ input, button, textarea {
 .photo-card-img.lazy {
   background: linear-gradient(135deg, #fff0f3, #f3e8ff);
   min-height: 120px;
+}
+
+.photo-del-btn {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  border: none;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 5;
+}
+
+.photo-card:hover .photo-del-btn {
+  display: flex;
+}
+
+.photo-del-btn:hover {
+  background: var(--danger);
 }
 
 .photo-card-info {
