@@ -188,18 +188,36 @@
           if (entry.isIntersecting) {
             var img = entry.target;
             var src = img.getAttribute('data-src');
-            if (src) {
+            if (!src) return;
+
+            if (src.indexOf(API_BASE + '?id=') !== -1 || src.indexOf('/api/photos?id=') !== -1) {
+              fetch(src).then(function (r) { return r.json(); }).then(function (res) {
+                if (res && res.data && res.data.image_data) {
+                  img.src = res.data.image_data;
+                }
+              }).catch(function () {});
+            } else {
               img.src = src;
-              img.classList.remove('lazy');
-              observer.unobserve(img);
             }
+
+            img.classList.remove('lazy');
+            observer.unobserve(img);
           }
         });
       }, { rootMargin: '100px' });
       gridEl.querySelectorAll('.lazy').forEach(function (img) { observer.observe(img); });
     } else {
       gridEl.querySelectorAll('.lazy').forEach(function (img) {
-        img.src = img.getAttribute('data-src');
+        var src = img.getAttribute('data-src');
+        if (src) {
+          if (src.indexOf('/api/photos?id=') !== -1) {
+            fetch(src).then(function (r) { return r.json(); }).then(function (res) {
+              if (res && res.data && res.data.image_data) img.src = res.data.image_data;
+            });
+          } else {
+            img.src = src;
+          }
+        }
         img.classList.remove('lazy');
       });
     }
