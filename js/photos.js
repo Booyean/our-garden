@@ -205,6 +205,7 @@
             if (src.indexOf('/api/photos?id=') !== -1) {
               fetch(src).then(function (r) { return r.json(); }).then(function (res) {
                 if (res && res.data && res.data.image_data) {
+                  photo.image_data = res.data.image_data;
                   img.src = res.data.image_data;
                 }
               }).catch(function () {});
@@ -387,14 +388,16 @@
     if (photo.image_data) {
       lbImg.src = photo.image_data;
     } else {
+      lbImg.classList.add('lb-loading');
       var apiUrl = API_BASE + '/api/photos?id=' + photo.id;
       if (!state.useLocal) {
         fetch(apiUrl).then(function (r) { return r.json(); }).then(function (res) {
           if (res.success && res.data) {
             photo.image_data = res.data.image_data;
             lbImg.src = photo.image_data;
+            lbImg.classList.remove('lb-loading');
           }
-        }).catch(function () {});
+        }).catch(function () { lbImg.classList.remove('lb-loading'); });
       }
     }
 

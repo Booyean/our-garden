@@ -1057,6 +1057,13 @@ input, button, textarea {
   box-shadow: 0 8px 40px rgba(0, 0, 0, 0.4);
 }
 
+.lb-img.lb-loading {
+  min-width: 60px;
+  min-height: 60px;
+  background: rgba(255, 255, 255, 0.1) url("data:image/svg+xml;charset=UTF-8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white'><circle cx='12' cy='3' r='2'><animate attributeName='opacity' values='1;0.2;1' dur='1s' repeatCount='indefinite' begin='0s'/></circle><circle cx='18' cy='5' r='2'><animate attributeName='opacity' values='1;0.2;1' dur='1s' repeatCount='indefinite' begin='0.15s'/></circle><circle cx='21' cy='12' r='2'><animate attributeName='opacity' values='1;0.2;1' dur='1s' repeatCount='indefinite' begin='0.3s'/></circle><circle cx='18' cy='19' r='2'><animate attributeName='opacity' values='1;0.2;1' dur='1s' repeatCount='indefinite' begin='0.45s'/></circle><circle cx='12' cy='21' r='2'><animate attributeName='opacity' values='1;0.2;1' dur='1s' repeatCount='indefinite' begin='0.6s'/></circle><circle cx='6' cy='19' r='2'><animate attributeName='opacity' values='1;0.2;1' dur='1s' repeatCount='indefinite' begin='0.75s'/></circle><circle cx='3' cy='12' r='2'><animate attributeName='opacity' values='1;0.2;1' dur='1s' repeatCount='indefinite' begin='0.9s'/></circle><circle cx='6' cy='5' r='2'><animate attributeName='opacity' values='1;0.2;1' dur='1s' repeatCount='indefinite' begin='1.05s'/></circle></svg>") center / 40px no-repeat;
+  border-radius: 8px;
+}
+
 .lb-info {
   text-align: center;
   margin-top: 16px;
