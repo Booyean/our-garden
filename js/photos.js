@@ -13,8 +13,11 @@
   var state = {
     photos: [],
     useLocal: false,
-    lbIndex: -1
+    lbIndex: -1,
+    page: 0
   };
+
+  var PAGE_SIZE = 3;
 
   var timerEl = $('timerValue');
   var gridEl = $('photosGrid');
@@ -111,15 +114,25 @@
     if (state.photos.length === 0) {
       gridEl.style.display = 'none';
       emptyEl.style.display = 'flex';
+      $('photosPager').style.display = 'none';
       return;
     }
     gridEl.style.display = 'grid';
     emptyEl.style.display = 'none';
 
-    state.photos.forEach(function (photo, idx) {
+    var totalPages = Math.ceil(state.photos.length / PAGE_SIZE);
+    if (state.page >= totalPages) state.page = totalPages - 1;
+    if (state.page < 0) state.page = 0;
+
+    var start = state.page * PAGE_SIZE;
+    var end = Math.min(start + PAGE_SIZE, state.photos.length);
+    var pagePhotos = state.photos.slice(start, end);
+
+    pagePhotos.forEach(function (photo) {
+      var realIdx = state.photos.indexOf(photo);
       var card = document.createElement('div');
       card.className = 'photo-card';
-      card.setAttribute('data-idx', idx);
+      card.setAttribute('data-idx', realIdx);
 
       var imgWrap = document.createElement('div');
       imgWrap.className = 'photo-card-img-wrap';
@@ -148,12 +161,24 @@
       card.appendChild(imgWrap);
       card.appendChild(info);
 
-      card.addEventListener('click', function () { openLightbox(idx); });
+      card.addEventListener('click', function () { openLightbox(realIdx); });
       gridEl.appendChild(card);
     });
 
+    updatePager(totalPages);
+
     initLazyLoad();
     initDeleteOnDblClick();
+  }
+
+  function updatePager(totalPages) {
+    var pager = $('photosPager');
+    if (totalPages <= 1) {
+      pager.style.display = 'none';
+      return;
+    }
+    pager.style.display = 'flex';
+    $('photosPageInfo').textContent = (state.page + 1) + ' / ' + totalPages;
   }
 
   function initLazyLoad() {
@@ -376,10 +401,24 @@
   $('lbNext').addEventListener('click', lbNext);
 
   document.addEventListener('keydown', function (e) {
-    if (!lightbox.classList.contains('open')) return;
-    if (e.key === 'Escape') closeLightbox();
-    if (e.key === 'ArrowLeft') lbPrev();
-    if (e.key === 'ArrowRight') lbNext();
+    if (lightbox.classList.contains('open')) {
+      if (e.key === 'Escape') closeLightbox();
+      if (e.key === 'ArrowLeft') lbPrev();
+      if (e.key === 'ArrowRight') lbNext();
+      return;
+    }
+    if (e.key === 'ArrowLeft') { state.page = Math.max(0, state.page - 1); renderPhotos(); }
+    if (e.key === 'ArrowRight') { state.page = Math.min(Math.ceil(state.photos.length / PAGE_SIZE) - 1, state.page + 1); renderPhotos(); }
+  });
+
+  $('photosPrev').addEventListener('click', function () {
+    state.page = Math.max(0, state.page - 1);
+    renderPhotos();
+  });
+
+  $('photosNext').addEventListener('click', function () {
+    state.page = Math.min(Math.ceil(state.photos.length / PAGE_SIZE) - 1, state.page + 1);
+    renderPhotos();
   });
 
   var surpriseClickCount = 0;

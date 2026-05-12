@@ -835,6 +835,23 @@ input, button, textarea {
   font-family: "卓特清雅体", "LXGW Wenkai Screen", sans-serif;
 }
 
+/* ========== Photos Pager ========== */
+.photos-pager {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+
+.photos-page-info {
+  font-size: 14px;
+  color: var(--text-light);
+  font-family: "卓特清雅体", "LXGW Wenkai Screen", sans-serif;
+  min-width: 60px;
+  text-align: center;
+}
+
 /* ========== Photos Toolbar ========== */
 .photos-toolbar {
   display: flex;
