@@ -37,6 +37,7 @@
       this._bindEvents();
       this._restorePlayback();
       this._startStateSaver();
+      this._resumeOnInteraction();
     },
 
     start: function () {
@@ -75,26 +76,49 @@
         var onSeeked = function () {
           self.audio.removeEventListener('seeked', onSeeked);
           if (self.state.playing) {
-            self.audio.play().catch(function () {});
+            self.audio.play().then(function () {
+              self._syncUI();
+            }).catch(function () {
+              self.state.playing = false;
+              self._syncUI();
+            });
           }
-          self._syncUI();
         };
         this.audio.addEventListener('seeked', onSeeked);
         this.audio.addEventListener('loadedmetadata', function () {
           self.audio.currentTime = self.state.position;
         }, { once: true });
       } else if (this.state.playing) {
-        this.audio.play().catch(function () {});
-        this._syncUI();
+        this.audio.play().then(function () {
+          self._syncUI();
+        }).catch(function () {
+          self.state.playing = false;
+          self._syncUI();
+        });
       }
 
       this._syncUI();
     },
 
+    _resumeOnInteraction: function () {
+      var self = this;
+      if (self._interactionHandler) return;
+      self._interactionHandler = function () {
+        if (self.audio && self.audio.src && self.state.playing && self.audio.paused) {
+          self.audio.play().catch(function () {});
+        }
+      };
+      document.addEventListener('click', self._interactionHandler, { once: false });
+    },
+
     play: function () {
       this.state.playing = true;
       saveState(this.state);
-      this.audio.play().catch(function () {});
+      this.audio.play().then(function () {}.bind(this)).catch(function () {
+        this.state.playing = false;
+        saveState(this.state);
+        this._resumeOnInteraction();
+      }.bind(this));
       this._syncUI();
     },
 

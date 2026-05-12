@@ -19,8 +19,6 @@
     { text: '', delay: 500 },
     { text: '\u2764\uFE0F 我想对你说：', delay: 1000 },
     { text: '', delay: 400 },
-    { text: '从我们在一起的那天起，', delay: 800 },
-    { text: '我就在写这个程序。', delay: 700 },
     { text: '每一行代码，都是我想你的证明。', delay: 800 },
     { text: '你是我的 0 errors, 0 warnings。', delay: 900 },
     { text: '唯一的 exception 是——', delay: 700 },
